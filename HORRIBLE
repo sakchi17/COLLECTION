@@ -1,0 +1,108 @@
+//HORRIBLE: Horrible queries
+//https://www.spoj.com/problems/HORRIBLE/
+
+
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long int
+ll segtr[4*100001],lazy[4*100001];
+
+void build(ll node,ll start, ll end)
+{
+if(start==end)
+segtr[node]=0;
+else
+{
+ll mid=(start+end)/2;
+build(2*node,start,mid);
+build(2*node+1,mid+1,end);
+segtr[node]=0;
+}
+}
+
+void updlazy(ll v,ll st,ll end,ll l,ll r,ll val)
+{
+if(lazy[v]!=0)
+{
+segtr[v]+=(end-st+1)*lazy[v];
+if(st!=end)
+{
+lazy[2*v]+=lazy[v];
+lazy[2*v+1]+=lazy[v];
+}
+lazy[v]=0;
+}
+
+if(st>r || end<l)
+return;
+
+if(st>=l && end<=r)
+{
+segtr[v]+=(end-st+1)*val;
+if(st!=end)
+{
+lazy[2*v]+=val;
+lazy[2*v+1]+=val;
+}
+return;
+}
+ll mid=(st+end)/2;
+updlazy(2*v,st,mid,l,r,val);
+updlazy(2*v+1,mid+1,end,l,r,val);
+segtr[v]=segtr[2*v]+segtr[2*v+1];
+}
+
+ll query(ll v,ll st,ll end,ll l,ll r)
+{
+
+if(lazy[v]!=0)
+{
+segtr[v]+=(end-st+1)*lazy[v];
+if(st!=end)
+{
+lazy[2*v]+=lazy[v];
+lazy[2*v+1]+=lazy[v];
+}
+lazy[v]=0;
+}
+if(st>r || end<l)
+return 0;
+if(st>=l && end<=r)
+return segtr[v];
+ll mid=(st+end)/2;
+ll p1=query(2*v,st,mid,l,r);
+ll p2=query(2*v+1,mid+1,end,l,r);
+return (p1+p2);
+}
+
+
+
+int main()
+{
+ll i,t,n,c,p,q,val;
+scanf("%lld",&t);
+while(t--)
+{
+memset(segtr,0,sizeof(segtr));
+memset(lazy,0,sizeof(lazy));
+int ch;
+scanf("%lld%lld",&n,&c);
+build(1,0,n-1);
+for(i=0;i<c;i++)
+{
+scanf("%d",&ch);
+if(ch==0)
+{
+scanf("%lld%lld%lld",&p,&q,&val);
+updlazy(1,0,n-1,p-1,q-1,val);
+}
+else
+{
+scanf("%lld%lld",&p,&q);
+ll ans=query(1,0,n-1,p-1,q-1);
+printf("%lld\n",ans);
+}
+}
+}
+return 0;
+}
